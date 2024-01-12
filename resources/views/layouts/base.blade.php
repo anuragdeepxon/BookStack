@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ isset($locale) ? $locale->htmlLang() : config('app.default_locale') }}"
-      dir="{{ isset($locale) ? $locale->htmlDirection() : 'auto' }}"
-      class="{{ setting()->getForCurrentUser('dark-mode-enabled') ? 'dark-mode ' : '' }}">
+    dir="{{ isset($locale) ? $locale->htmlDirection() : 'auto' }}"
+    class="{{ setting()->getForCurrentUser('dark-mode-enabled') ? 'dark-mode ' : '' }}">
+
 <head>
     <title>{{ isset($pageTitle) ? $pageTitle . ' | ' : '' }}{{ setting('app-name') }}</title>
 
@@ -10,7 +11,13 @@
     <meta name="viewport" content="width=device-width">
     <meta name="token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
-    <meta name="theme-color" content="{{(setting()->getForCurrentUser('dark-mode-enabled') ? setting('app-color-dark') : setting('app-color'))}}"/>
+    <meta name="theme-color"
+        content="{{(setting()->getForCurrentUser('dark-mode-enabled') ? setting('app-color-dark') : setting('app-color'))}}" />
+
+    @if (App::environment('production'))
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    @endif
+
 
     <!-- Social Cards Meta -->
     <meta property="og:title" content="{{ isset($pageTitle) ? $pageTitle . ' | ' : '' }}{{ setting('app-name') }}">
@@ -43,12 +50,12 @@
     <!-- Translations for JS -->
     @stack('translations')
 </head>
-<body
-    @if(setting()->getForCurrentUser('ui-shortcuts-enabled', false))
-        component="shortcuts"
-        option:shortcuts:key-map="{{ \BookStack\Settings\UserShortcutMap::fromUserPreferences()->toJson() }}"
+
+<body @if(setting()->getForCurrentUser('ui-shortcuts-enabled', false))
+    component="shortcuts"
+    option:shortcuts:key-map="{{ \BookStack\Settings\UserShortcutMap::fromUserPreferences()->toJson() }}"
     @endif
-      class="@stack('body-class')">
+    class="@stack('body-class')">
 
     @include('layouts.parts.base-body-start')
     @include('layouts.parts.skip-to-content')
@@ -69,10 +76,11 @@
 
     @yield('bottom')
     @if($cspNonce ?? false)
-        <script src="{{ versioned_asset('dist/app.js') }}" nonce="{{ $cspNonce }}"></script>
+    <script src="{{ versioned_asset('dist/app.js') }}" nonce="{{ $cspNonce }}"></script>
     @endif
     @yield('scripts')
 
     @include('layouts.parts.base-body-end')
 </body>
+
 </html>
